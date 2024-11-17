@@ -1,9 +1,8 @@
 import volo.baml_client as baml
-# from volo.baml_client.types import VoloResponse, ArchivistAnswer
-# import volo.baml_client.types 
 import requests
 import json
 from dataclasses import dataclass
+import asyncio
 
 @dataclass
 class ArchivistResult:
@@ -17,7 +16,7 @@ class ArchivistResult:
 
 
 
-def ask_archivist_rec(query: str, url: str, visited: set[str], results: list[ArchivistResult], depth: int, max_depth: int):
+async def ask_archivist_rec(query: str, url: str, visited: set[str], results: list[ArchivistResult], depth: int, max_depth: int):
     '''
     sources: set of URLs visited w relevant info
     '''
@@ -52,21 +51,22 @@ def ask_archivist_rec(query: str, url: str, visited: set[str], results: list[Arc
         ))
         return
     
+    jobs = []
     for followup in archivist_resp.queries:
-        # TODO: batch async
-        ask_archivist_rec(
+        jobs.append(ask_archivist_rec(
             query=followup.question,
             url=followup.url,
             visited=visited,
             results=results,
             depth=depth+1,
             max_depth=max_depth
-        )
+        ))
+    await asyncio.gather(*jobs)
 
 
 def ask_archivist(query: str, max_depth=5) -> list[ArchivistResult]:
     results = []
-    ask_archivist_rec(query, url="/api", visited=set(), results=results, depth=0, max_depth=max_depth)
+    asyncio.run(ask_archivist_rec(query, url="/api", visited=set(), results=results, depth=0, max_depth=max_depth))
     return results
 
     #archivist_resp = baml.b.RecursiveLookup(query=query)
@@ -85,7 +85,7 @@ if __name__ == '__main__':
             volo_resp = resp.response
             
         else:
-            print(resp.user_roleplay_message)
+            print(f"\n{resp.user_roleplay_message}")
             #archivist_query = resp.archivist_query
             results = ask_archivist(resp.archivist_query)
             
@@ -106,7 +106,7 @@ if __name__ == '__main__':
                 volo_resp += f"\n\n{sources_desc}"
             #print(f"\n[Sources: {sources_desc}]")
         
-        print(volo_resp)
+        print(f"\n{volo_resp}\n")
         history.append(baml.types.ChatHistoryItem(user_query=query, volo_response=volo_resp))
         
 #print(ask_archivist("Tell me about different kinds of dragons"))

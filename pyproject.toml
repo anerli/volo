@@ -8,6 +8,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "asyncio>=3.4.3",
     "baml-py>=0.68.0",
     "requests>=2.32.3",
 ]
