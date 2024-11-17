@@ -36,7 +36,7 @@ async def ask_archivist_rec(query: str, url: str, visited: set[str], results: li
 
     visited.add(url)
 
-    archivist_resp = baml.b.RecursiveLookup(
+    archivist_resp = await baml.b.RecursiveLookup(
         question=query,
         current_endpoint=url,
         api_content=data_context
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     while True:
         query = input('> ')
 
-        resp = baml.b.VoloChat(query=query, history=history)
+        resp = asyncio.run(baml.b.VoloChat(query=query, history=history))
 
         if isinstance(resp, baml.types.VoloResponse):
             volo_resp = resp.response
@@ -92,11 +92,11 @@ if __name__ == '__main__':
             archivist_context = "\n\n".join(result.to_context() for result in results)
             #print("=== Archivist Context ===", archivist_context, sep="\n")
 
-            volo_resp = baml.b.VoloChatWithContext(
+            volo_resp = asyncio.run(baml.b.VoloChatWithContext(
                 query=query,
                 history=history,
                 archivist_context=archivist_context
-            )
+            ))
             #print(volo_resp)
 
             if results and include_sources:
