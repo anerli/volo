@@ -55,6 +55,12 @@ class ArchivistFollowups(BaseModel):
     
     queries: List["ArchivistFollowup"]
 
+class ChatHistoryItem(BaseModel):
+    
+    
+    user_query: str
+    volo_response: str
+
 class ContactArchivist(BaseModel):
     
     

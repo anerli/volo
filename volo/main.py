@@ -22,7 +22,7 @@ def ask_archivist_rec(query: str, url: str, visited: set[str], results: list[Arc
     sources: set of URLs visited w relevant info
     '''
     # dbg
-    print(f"ask_archivist_rec: {query} @ {url}")
+    #print(f"ask_archivist_rec: {query} @ {url}")
 
     if depth > max_depth or url in visited:
         return
@@ -72,27 +72,41 @@ def ask_archivist(query: str, max_depth=5) -> list[ArchivistResult]:
     #archivist_resp = baml.b.RecursiveLookup(query=query)
 
 if __name__ == '__main__':
-    query = input('> ')
+    include_sources = True
 
-    resp = baml.b.VoloChat(query=query)
+    history: list[baml.types.ChatHistoryItem] = []
 
-    if isinstance(resp, baml.types.VoloResponse):
-        print(resp.response)
-    else:
-        print(resp.user_roleplay_message)
-        #archivist_query = resp.archivist_query
-        results = ask_archivist(resp.archivist_query)
+    while True:
+        query = input('> ')
+
+        resp = baml.b.VoloChat(query=query, history=history)
+
+        if isinstance(resp, baml.types.VoloResponse):
+            volo_resp = resp.response
+            
+        else:
+            print(resp.user_roleplay_message)
+            #archivist_query = resp.archivist_query
+            results = ask_archivist(resp.archivist_query)
+            
+            archivist_context = "\n\n".join(result.to_context() for result in results)
+            #print("=== Archivist Context ===", archivist_context, sep="\n")
+
+            volo_resp = baml.b.VoloChatWithContext(
+                query=query,
+                history=history,
+                archivist_context=archivist_context
+            )
+            #print(volo_resp)
+
+            if results and include_sources:
+                sources_desc = ", ".join(f"https://www.dnd5eapi.co{result.source_url}" for result in results)
+                sources_desc = f"[Sources: {sources_desc}]"
+
+                volo_resp += f"\n\n{sources_desc}"
+            #print(f"\n[Sources: {sources_desc}]")
         
-        archivist_context = "\n\n".join(result.to_context() for result in results)
-        print("=== Archivist Context ===", archivist_context, sep="\n")
-
-        volo_resp = baml.b.VoloChatWithContext(
-            query=query,
-            archivist_context=archivist_context
-        )
         print(volo_resp)
-
-        sources_desc = ", ".join(f"https://www.dnd5eapi.co{result.source_url}" for result in results)
-        print(f"\n[Sources: {sources_desc}]")
+        history.append(baml.types.ChatHistoryItem(user_query=query, volo_response=volo_resp))
         
 #print(ask_archivist("Tell me about different kinds of dragons"))

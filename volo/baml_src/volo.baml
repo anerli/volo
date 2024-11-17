@@ -15,7 +15,12 @@ Do not use roleplay action text with asterisks in your response.
 Do not introduce yourself and get right to the point.
 "#
 
-function VoloChatWithContext(query: string, archivist_context: string) -> string {
+class ChatHistoryItem {
+    user_query string
+    volo_response string
+}
+
+function VoloChatWithContext(query: string, history: ChatHistoryItem[], archivist_context: string) -> string {
     client CustomHaiku
     prompt #"
         {{ _.role("system") }}
@@ -24,12 +29,19 @@ function VoloChatWithContext(query: string, archivist_context: string) -> string
         You have collected this information possibly pertaining to the user's question, which you may use to create your response:
         {{ archivist_context }}
 
+        {% for item in history %}
+        {{ _.role("user") }}
+        {{ item.user_query}}
+        {{ _.role("assistant") }}
+        {{ item.volo_response}}
+        {% endfor %}
+
         {{ _.role("user") }}
         {{ query }}
     "#
 }
 
-function VoloChat(query: string) -> VoloResponse | ContactArchivist {
+function VoloChat(query: string, history: ChatHistoryItem[]) -> VoloResponse | ContactArchivist {
     client CustomHaiku
     prompt #"
         {{ _.role("system") }}
@@ -41,6 +53,13 @@ function VoloChat(query: string) -> VoloResponse | ContactArchivist {
         If you need to contact the archivist, you'll also provide a brief in-character roleplay message that indicates you're looking for the information.
         
         {{ ctx.output_format }}
+
+        {% for item in history %}
+        {{ _.role("user") }}
+        {{ item.user_query}}
+        {{ _.role("assistant") }}
+        {{ item.volo_response}}
+        {% endfor %}
 
         {{ _.role("user") }}
         {{ query }}

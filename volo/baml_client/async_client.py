@@ -98,7 +98,7 @@ class BamlAsyncClient:
     
     async def VoloChat(
         self,
-        query: str,
+        query: str,history: List[types.ChatHistoryItem],
         baml_options: BamlCallOptions = {},
     ) -> Union[types.VoloResponse, types.ContactArchivist]:
       __tb__ = baml_options.get("tb", None)
@@ -111,7 +111,7 @@ class BamlAsyncClient:
       raw = await self.__runtime.call_function(
         "VoloChat",
         {
-          "query": query,
+          "query": query,"history": history,
         },
         self.__ctx_manager.get(),
         tb,
@@ -121,7 +121,7 @@ class BamlAsyncClient:
     
     async def VoloChatWithContext(
         self,
-        query: str,archivist_context: str,
+        query: str,history: List[types.ChatHistoryItem],archivist_context: str,
         baml_options: BamlCallOptions = {},
     ) -> str:
       __tb__ = baml_options.get("tb", None)
@@ -134,7 +134,7 @@ class BamlAsyncClient:
       raw = await self.__runtime.call_function(
         "VoloChatWithContext",
         {
-          "query": query,"archivist_context": archivist_context,
+          "query": query,"history": history,"archivist_context": archivist_context,
         },
         self.__ctx_manager.get(),
         tb,
@@ -217,7 +217,7 @@ class BamlStreamClient:
     
     def VoloChat(
         self,
-        query: str,
+        query: str,history: List[types.ChatHistoryItem],
         baml_options: BamlCallOptions = {},
     ) -> baml_py.BamlStream[Optional[Union[partial_types.VoloResponse, partial_types.ContactArchivist]], Union[types.VoloResponse, types.ContactArchivist]]:
       __tb__ = baml_options.get("tb", None)
@@ -231,6 +231,7 @@ class BamlStreamClient:
         "VoloChat",
         {
           "query": query,
+          "history": history,
         },
         None,
         self.__ctx_manager.get(),
@@ -247,7 +248,7 @@ class BamlStreamClient:
     
     def VoloChatWithContext(
         self,
-        query: str,archivist_context: str,
+        query: str,history: List[types.ChatHistoryItem],archivist_context: str,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.BamlStream[Optional[str], str]:
       __tb__ = baml_options.get("tb", None)
@@ -261,6 +262,7 @@ class BamlStreamClient:
         "VoloChatWithContext",
         {
           "query": query,
+          "history": history,
           "archivist_context": archivist_context,
         },
         None,
