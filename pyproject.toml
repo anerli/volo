@@ -1,0 +1,13 @@
+[project]
+name = "volo"
+version = "0.1.0"
+authors = [
+    { name="Anders Lie", email="anders@langur.ai" },
+]
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "baml-py>=0.68.0",
+    "requests>=2.32.3",
+]
